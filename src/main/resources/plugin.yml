@@ -1,0 +1,11 @@
+name: StaffBhop
+version: '${version}'
+main: dev.rocketship01.staffbhop.Main
+api-version: '1.21'
+author: rocketship01
+description: Lets you scaffold as staff.
+
+permissions:
+  staffbhop.use:
+    description: Allows toggling and using staff bhop
+    default: op
