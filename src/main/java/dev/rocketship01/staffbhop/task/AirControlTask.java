@@ -35,7 +35,7 @@ public final class AirControlTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (airControl <= 0.0) {
+        if (airControl <= 0.0 || toggleState.active().isEmpty()) {
             return;
         }
 
