@@ -9,8 +9,10 @@ public final class BhopToggleState {
 
     private final Set<UUID> enabled = ConcurrentHashMap.newKeySet();
 
+    private final Set<UUID> activeView = Collections.unmodifiableSet(enabled);
+
     public boolean isEnabled(UUID uuid) {
-        return enabled.contains(uuid);
+        return uuid != null && enabled.contains(uuid);
     }
 
     public boolean toggle(UUID uuid) {
@@ -22,14 +24,17 @@ public final class BhopToggleState {
     }
 
     public void clear(UUID uuid) {
+
         enabled.remove(uuid);
     }
 
     public void clearAll() {
+
         enabled.clear();
     }
 
     public Set<UUID> active(){
-        return Collections.unmodifiableSet(enabled);
+
+        return activeView;
     }
 }

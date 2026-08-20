@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import dev.rocketship01.staffbhop.Main;
 import dev.rocketship01.staffbhop.util.BhopToggleState;
 import dev.rocketship01.staffbhop.util.Directions;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,13 +34,10 @@ public final class BhopListener implements Listener {
     public void onJump(PlayerJumpEvent event) {
         Player player = event.getPlayer();
 
-        if (!toggleState.isEnabled(player.getUniqueId())) {
-            return;
-        }
-        if (player.isFlying() || player.isGliding() || player.isInsideVehicle()) {
-            return;
-        }
-        if (!player.hasPermission(PERMISSION)) {
+        if (!toggleState.isEnabled(player.getUniqueId())
+                || player.getGameMode() != GameMode.CREATIVE
+                || player.isGliding()
+                || !player.hasPermission(PERMISSION)) {
             return;
         }
 
@@ -48,13 +46,16 @@ public final class BhopListener implements Listener {
             return;
         }
 
-        // Eén tick wachten: de sprong-velocity wordt na dit event gezet,
-        // dus direct setVelocity zou meteen overschreven worden.
         plugin.getServer().getScheduler().runTask(plugin, () -> applySpeed(player, direction));
     }
 
-    /** Zet de horizontale snelheid op een vaste waarde. Geen accumulatie. */
     private void applySpeed(Player player, Vector direction) {
+        if (!player.isOnline() || player.isDead()
+                || player.getGameMode() != GameMode.CREATIVE
+                || !toggleState.isEnabled(player.getUniqueId())) {
+            return;
+        }
+
         Vector velocity = player.getVelocity();
 
         player.setVelocity(new Vector(

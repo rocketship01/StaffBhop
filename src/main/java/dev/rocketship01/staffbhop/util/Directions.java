@@ -12,23 +12,25 @@ public final class Directions {
     }
 
     public static Vector fromInput(Player player, Input input) {
-        Vector forward = player.getLocation().getDirection().setY(0);
-        if (forward.lengthSquared() < EPSILON) {
+        double x = 0;
+        double z = 0;
+
+        double yaw = Math.toRadians(player.getYaw());
+        double forwardX = -Math.sin(yaw);
+        double forwardZ = Math.cos(yaw);
+
+        if (input.isForward())  { x += forwardX; z += forwardZ; }
+        if (input.isBackward()) { x -= forwardX; z -= forwardZ; }
+
+        if (input.isRight())    { x -= forwardZ; z += forwardX; }
+        if (input.isLeft())     { x += forwardZ; z -= forwardX; }
+
+        double lengthSquared = x * x + z * z;
+        if (lengthSquared < EPSILON) {
             return null;
         }
-        forward.normalize();
 
-        Vector right = new Vector(-forward.getZ(), 0, forward.getX());
-        Vector direction = new Vector();
-
-        if (input.isForward())  direction.add(forward);
-        if (input.isBackward()) direction.subtract(forward);
-        if (input.isRight())    direction.add(right);
-        if (input.isLeft())     direction.subtract(right);
-
-        if (direction.lengthSquared() < EPSILON) {
-            return null;
-        }
-        return direction.normalize();
+        double length = Math.sqrt(lengthSquared);
+        return new Vector(x / length, 0, z / length);
     }
 }
