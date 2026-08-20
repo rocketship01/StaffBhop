@@ -1,5 +1,6 @@
 package dev.rocketship01.staffbhop.util;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,5 +27,9 @@ public final class BhopToggleState {
 
     public void clearAll() {
         enabled.clear();
+    }
+
+    public Set<UUID> active(){
+        return Collections.unmodifiableSet(enabled);
     }
 }

@@ -1,3 +1,7 @@
+bhop:
+  speed: 0.75
+  air-control: 1
+
 messages:
   enabled: "&aStaff Bhop enabled"
   disabled: "&cStaff Bhop disabled"
