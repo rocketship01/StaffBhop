@@ -1,6 +1,3 @@
-toggle:
-  mode: SWAP_HANDS
-
 messages:
   enabled: "&aStaff Bhop enabled"
   disabled: "&cStaff Bhop disabled"

@@ -12,7 +12,13 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        getServer().getPluginManager().registerEvents(new ToggleListener(this, toggleState), this);
+        getServer().getPluginManager()
+                .registerEvents(new ToggleListener(this, toggleState), this);
+    }
+
+    @Override
+    public void onDisable() {
+        toggleState.clearAll();
     }
 
     public BhopToggleState getToggleState() {

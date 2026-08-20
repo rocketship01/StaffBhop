@@ -2,12 +2,12 @@ package dev.rocketship01.staffbhop.listeners;
 
 import dev.rocketship01.staffbhop.Main;
 import dev.rocketship01.staffbhop.util.BhopToggleState;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
@@ -15,49 +15,47 @@ public final class ToggleListener implements Listener {
 
     private static final String PERMISSION = "staffbhop.use";
 
-    private final Main plugin;
     private final BhopToggleState toggleState;
 
+    private final Component enabledMessage;
+    private final Component disabledMessage;
+
     public ToggleListener(Main plugin, BhopToggleState toggleState) {
-        this.plugin = plugin;
         this.toggleState = toggleState;
+
+        var config = plugin.getConfig();
+        this.enabledMessage = parse(config.getString("messages.enabled"));
+        this.disabledMessage = parse(config.getString("messages.disabled"));
     }
 
-    @EventHandler
+    private static Component parse(String raw) {
+        if (raw == null || raw.isEmpty()) {
+            return null;
+        }
+        return LegacyComponentSerializer.legacyAmpersand().deserialize(raw);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onSwapHands(PlayerSwapHandItemsEvent event) {
-        if (isMode("SWAP_HANDS")) {
-            handleToggle(event.getPlayer(), event);
-        }
-    }
+        Player player = event.getPlayer();
 
-    @EventHandler
-    public void onDropItem(PlayerDropItemEvent event) {
-        if (isMode("DROP_ITEM")) {
-            handleToggle(event.getPlayer(), event);
-        }
-    }
-
-    @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
-        toggleState.clear(event.getPlayer().getUniqueId());
-    }
-
-    private void handleToggle(Player player, Cancellable event) {
         if (!player.hasPermission(PERMISSION)) {
             return;
         }
         event.setCancelled(true);
 
-        boolean nowEnabled = toggleState.toggle(player.getUniqueId());
-        String raw = plugin.getConfig().getString(
-                nowEnabled ? "messages.enabled" : "messages.disabled", "");
+        player.updateInventory();
 
-        if (raw != null && !raw.isEmpty()) {
-            player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(raw));
+        boolean nowEnabled = toggleState.toggle(player.getUniqueId());
+        Component message = nowEnabled ? enabledMessage : disabledMessage;
+
+        if (message != null) {
+            player.sendMessage(message);
         }
     }
 
-    private boolean isMode(String mode) {
-        return mode.equalsIgnoreCase(plugin.getConfig().getString("toggle.mode", "SWAP_HANDS"));
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        toggleState.clear(event.getPlayer().getUniqueId());
     }
 }
